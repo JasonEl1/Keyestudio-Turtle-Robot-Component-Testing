@@ -1,7 +1,7 @@
 /*
 for Keyestudio Turtle Robot V3.1 :
 
-tests both drive motors, servo, and ultrasonic sensor (sent to serial monitor)
+tests both drive motors, servo, and ultrasonic sensor.
 */
 
 #include <Servo.h>
@@ -17,6 +17,7 @@ Servo servo;
 #define motorB_PWM 5   //PWM control pin of B motor / R
 
 float distance_cm;
+long duration;
 
 void getDistance(){
   digitalWrite(ultrasonicTrigPin,LOW);
@@ -25,13 +26,14 @@ void getDistance(){
   delayMicroseconds(10);
   digitalWrite(ultrasonicTrigPin,LOW);
   duration = pulseIn(ultrasonicEchoPin,HIGH);
-  distance_cm = (34/duration)/2; //2*distance = (speed/time)
-  Serial.println(distance_cm);
+  distance_cm = (34*duration)/2; //2*distance = (speed*time)
+  distance_cm /= 1000;
+  if(distance_cm>0.0){Serial.println(distance_cm);}
 }
 
 void setup(){
   pinMode(ultrasonicTrigPin,OUTPUT);
-  pinMode(ultrasonicEchoPin,OUTPUT);
+  pinMode(ultrasonicEchoPin,INPUT);
   pinMode(motorA_direction,OUTPUT);
   pinMode(motorA_PWM,OUTPUT);
   pinMode(motorB_direction,OUTPUT);
@@ -42,7 +44,7 @@ void setup(){
   Serial.begin(9600);
 }
 void loop(){
-  //servo.write(150);
+  servo.write(150);
   digitalWrite(motorA_direction,HIGH);
   analogWrite(motorA_PWM,220);
   digitalWrite(motorB_direction,HIGH);

@@ -1,7 +1,7 @@
 /*
 for Keyestudio Turtle Robot V3.1 :
 
-tests both drive motors, servo, 8x8 i2c matrix, and ultrasonic sensor.
+tests both drive motors, servo, 8x8 i2c matrix, ultrasonic sensor, line following sensor, and bluetooth module.
 
 requires Adafruit_LEDBackpack and Adafruit_GFX libraries. 
 LEDBackpack download : https://drive.google.com/drive/folders/1Fg4iyz1GAwLuM2Pid2zuK3o0rjIoWdiZ
@@ -10,14 +10,6 @@ place downloaded library folders in "libraries" sub-folder of Arduino folder
 
 or install using arduino IDE manage libraries tool
 */
-
-#include <Wire.h>
-#include "Adafruit_LEDBackpack.h"
-#include "Adafruit_GFX.h"
-Adafruit_LEDBackpack matrix = Adafruit_LEDBackpack();
-
-#include <Servo.h>
-Servo servo;
 
 #define ultrasonicTrigPin 12
 #define ultrasonicEchoPin 13
@@ -34,6 +26,14 @@ Servo servo;
 #define lineFollow_mid 7
 #define lineFollow_right 8
 
+#include <Wire.h>
+#include "Adafruit_LEDBackpack.h"
+#include "Adafruit_GFX.h"
+Adafruit_LEDBackpack matrix = Adafruit_LEDBackpack();
+
+#include <Servo.h>
+Servo servo;
+
 float distance_cm;
 long duration;
 
@@ -46,7 +46,8 @@ void getDistance(){
   duration = pulseIn(ultrasonicEchoPin,HIGH);
   distance_cm = (34*duration)/2; //2*distance = (speed*time)
   distance_cm /= 1000;
-  if(distance_cm>0.0){Serial.println(distance_cm);}
+  if(distance_cm<0.0){distance_cm = 0.0;}
+  //Serial.println(distance_cm);
 }
 
 void matrix_smile(){
@@ -97,6 +98,8 @@ void matrix_big_circle(){
   matrix.writeDisplay();
 }
 
+int BTLE_val;
+
 void setup(){
   pinMode(ultrasonicTrigPin,OUTPUT);
   pinMode(ultrasonicEchoPin,INPUT);
@@ -112,7 +115,7 @@ void setup(){
 
   Serial.begin(9600);
 
-  matrix.begin(0x70); //default adress, can check for real adress using i2c scanner program if needed
+  matrix.begin(0x70); //default address
 }
 void loop(){
   
@@ -132,5 +135,12 @@ void loop(){
   else{
     matrix_clear();
     matrix_small_circle();
+  }
+  BTLE_val = Serial.read();
+  //Serial.println(BTLE_val);
+  switch(BTLE_val)
+  {
+    case 'h': Serial.println("HI");break;
+    case 'b': Serial.println("BYE");break;
   }
 }
